@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/RefactoringMiner"/>
+	<classpathentry kind="lib" path="/Users/nicolasg-chausseau/.gradle/caches/modules-2/files-2.1/org.eclipse.jgit/org.eclipse.jgit/4.7.0.201704051617-r/99be65d1827276b97d4f51668b60f4a38f282bda/org.eclipse.jgit-4.7.0.201704051617-r.jar" sourcepath="/Users/nicolasg-chausseau/.gradle/caches/modules-2/files-2.1/org.eclipse.jgit/org.eclipse.jgit/4.7.0.201704051617-r/de519d6f352aaf12e4c65f7590591326ac24d2e8/org.eclipse.jgit-4.7.0.201704051617-r-sources.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
