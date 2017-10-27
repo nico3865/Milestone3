@@ -97,18 +97,24 @@ public class Main {
 
 			}
 			
-//			@Override
-//			public void handle(String commitId, List<Refactoring> refactorings) {
-//				System.out.println("==============================================");
-//				System.out.println("@every_commit!!!");
-//				System.out.println("Refactorings at " + commitId);
-//				for (Refactoring ref : refactorings) {
-//					System.out.println(">>>>>>>>>>>>>>>>>>");
-//					System.out.println(ref.toString());
-//					System.out.println(ref.getRefactoringType());
-//					System.out.println(ref.getName());
-//				}
-//			}
+			// NB: after installing RefactoringMiner --> don't forget to add the call for the callback just above with signature (1):
+			// --> handle(RevCommit commitData, List<Refactoring> refactorings)
+			// To do so, get the call hierarchy for the similar callback just below (2):
+			// --> handle(String commitId, List<Refactoring> refactorings)
+			// and just below the call for this callback (2), add the call for the other callback (1)
+			// then finally the callback above will work.
+			@Override
+			public void handle(String commitId, List<Refactoring> refactorings) {
+				System.out.println("==============================================");
+				System.out.println("@every_commit!!!");
+				System.out.println("Refactorings at " + commitId);
+				for (Refactoring ref : refactorings) {
+					System.out.println(">>>>>>>>>>>>>>>>>>");
+					System.out.println(ref.toString());
+					System.out.println(ref.getRefactoringType());
+					System.out.println(ref.getName());
+				}
+			}
 			
 			public void onFinish(int refactoringsCount, int commitsCount, int errorCommitsCount) {
 				System.out.println("refactoringsCount ==> "+refactoringsCount);
