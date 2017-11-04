@@ -7,6 +7,7 @@ using DataRepository;
 using System.Linq;
 using RefactoringAndSmellsSaver.DomainModels;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace RefactoringAndSmellsSaver
 {
@@ -20,6 +21,8 @@ namespace RefactoringAndSmellsSaver
                 SaveRefactorings(args);
             else if(args[0]=="save-smells")
                 DetectBadSmells(args);
+            else if(args[0]=="r17")
+                new ResearchQuestions.RQ7.AnswerResolver().Resolve();
         }
 
         private static void SaveRefactorings(string[] args)
@@ -36,6 +39,8 @@ namespace RefactoringAndSmellsSaver
         {
              using (var context = new BadSmellMinerDbContext())
             {
+
+                context.OrganicMethods.asn
                 var project = CreateProject(projectName, context);
                 
                 context.Refactorings.AddRange(refactorings);
