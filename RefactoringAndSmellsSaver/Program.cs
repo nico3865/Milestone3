@@ -21,7 +21,7 @@ namespace RefactoringAndSmellsSaver
                 SaveRefactorings(args);
             else if(args[0]=="save-smells")
                 DetectBadSmells(args);
-            else if(args[0]=="r17")
+            else if(args[0]=="rq7")
                 new ResearchQuestions.RQ7.AnswerResolver().Resolve();
         }
 
@@ -39,8 +39,6 @@ namespace RefactoringAndSmellsSaver
         {
              using (var context = new BadSmellMinerDbContext())
             {
-
-                context.OrganicMethods.asn
                 var project = CreateProject(projectName, context);
                 
                 context.Refactorings.AddRange(refactorings);

@@ -7,6 +7,7 @@ namespace RefactoringAndSmellsSaver.DomainModels
         public string CommitId { get; set; }
 
         public long ProjectId { get; set; }
+        public Project Project { get; set; }
         public string Type { get; set; }
 
         public string SourceClassName { get; set; }

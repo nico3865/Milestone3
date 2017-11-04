@@ -1,6 +1,7 @@
 using DataRepository;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ7
 {
@@ -10,16 +11,29 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ7
         {
             using (var dbContext = new BadSmellMinerDbContext())
             {
-                var refactorings = dbContext.Refactorings.ToArray();
-                var groups = refactorings.GroupBy(g=>g.ProjectId)
+                var refactorings = dbContext.Refactorings
+                .Include(q => q.Project)
+                .AsNoTracking()
+                .ToArray();
 
-                .Select(r=>new {
-                        TestCount=r
-                            .Where(rg=>rg.SourceClassPath.ToLower().Contains("test")).Count(),
-                        ProductionCount=r
-                        .Where(rg=>!rg.SourceClassPath.ToLower().Contains("test")).Count(),
+                var firstGroup = refactorings.GroupBy(g => g.ProjectId)
+
+                .Select(r => new
+                {
+                    ProjectName = r.First().Project.Name,
+                    TestCount = r
+                            .Where(rg => rg.SourceClassPath.ToLower().Contains("test")
+                            || rg.TargetClassPath.ToLower().Contains("test")
+                            || (!string.IsNullOrEmpty(rg.SourceOperatationName) && rg.SourceOperatationName.ToLower().Contains("test"))
+                            || (!string.IsNullOrEmpty(rg.TargetOperatationName) && rg.TargetOperatationName.ToLower().Contains("test")))
+                            .Count(),
+                    Total = r.Count()
                 });
 
+                foreach (var g in firstGroup)
+                {
+                    Console.WriteLine($"{g.ProjectName},{g.Total},{g.TestCount},{g.Total - g.TestCount}");
+                }
             }
         }
     }
