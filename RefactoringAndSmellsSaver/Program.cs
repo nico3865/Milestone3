@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using LibGit2Sharp;
@@ -17,14 +17,14 @@ namespace RefactoringAndSmellsSaver
         private static string _equinoxPluginFile ="org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar";
         static void Main(string[] args)
         {
-            // if(args[0]=="save-refactorings")
-            //     SaveRefactorings(args);
-            // else if(args[0]=="save-smells")
-            //     DetectBadSmells(args);
-            //TODO make a new else if and add a new configuration in the file:
-            QueryForResearchQuestion1();
-            
-
+            if(args[0]=="save-refactorings")
+                SaveRefactorings(args);
+            else if(args[0]=="save-smells")
+                DetectBadSmells(args);
+            else if(args[0]=="rq7")
+                new ResearchQuestions.RQ7.AnswerResolver().Resolve();
+            else if(args[0]=="rq3")
+                new ResearchQuestions.RQ3.AnswerResolver().Resolve();
         }
 
         private static void SaveRefactorings(string[] args)

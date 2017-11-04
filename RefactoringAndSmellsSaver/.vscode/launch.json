@@ -1,10 +1,41 @@
 {
-   // Use IntelliSense to find out which attributes exist for C# debugging
-   // Use hover for the description of the existing attributes
-   // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
-   "version": "0.2.0",
-   "configurations": [
-       
+    // Use IntelliSense to find out which attributes exist for C# debugging
+    // Use hover for the description of the existing attributes
+    // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (console) - RQ3",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceRoot}/bin/Debug/netcoreapp2.0/RefactoringAndSmellsSaver.dll",
+            "args": [
+                "rq3"
+            ],
+            "cwd": "${workspaceRoot}",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": ".NET Core Launch (console) - RQ7",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceRoot}/bin/Debug/netcoreapp2.0/RefactoringAndSmellsSaver.dll",
+            "args": [
+                "rq7"
+            ],
+            "cwd": "${workspaceRoot}",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
         {
             "name": ".NET Core Launch (console) - Smells",
             "type": "coreclr",
@@ -12,7 +43,12 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceRoot}/bin/Debug/netcoreapp2.0/RefactoringAndSmellsSaver.dll",
-            "args": ["save-smells","okhttp","https://github.com/square/okhttp.git","C:\\Users\\Ehsan\\Desktop\\BadSmellMiner\\projects\\okhttp"],
+            "args": [
+                "save-smells",
+                "okhttp",
+                "https://github.com/square/okhttp.git",
+                "C:\\Users\\Ehsan\\Desktop\\BadSmellMiner\\projects\\okhttp"
+            ],
             "cwd": "${workspaceRoot}",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "internalConsole",
@@ -26,7 +62,11 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceRoot}/bin/Debug/netcoreapp2.0/RefactoringAndSmellsSaver.dll",
-            "args": ["save-refactorings","gson","C:\\Users\\Ehsan\\Desktop\\BadSmellMiner\\projects\\gson\\refactorings"],
+            "args": [
+                "save-refactorings",
+                "gson",
+                "C:\\Users\\Ehsan\\Desktop\\BadSmellMiner\\projects\\gson\\refactorings"
+            ],
             "cwd": "${workspaceRoot}",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "internalConsole",
