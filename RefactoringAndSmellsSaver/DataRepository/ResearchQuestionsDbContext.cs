@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataRepository
 {
-    public class BadSmellMinerDbContext : DbContext
+    public class ResearchQuestionsDbContext : DbContext
     {
         public DbSet<Project> Projects { get; set; }
 
@@ -16,8 +16,6 @@ namespace DataRepository
         public DbSet<OrganicMethod> OrganicMethods { get; set; }
 
         public DbSet<OrganicMetrics> OrganicMetrics { get; set; }
-
-        public DbSet<OrganicSmell> OrganicSmell { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
