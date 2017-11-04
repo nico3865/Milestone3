@@ -23,6 +23,8 @@ namespace RefactoringAndSmellsSaver
                 DetectBadSmells(args);
             else if(args[0]=="rq7")
                 new ResearchQuestions.RQ7.AnswerResolver().Resolve();
+            else if(args[0]=="rq3")
+                new ResearchQuestions.RQ3.AnswerResolver().Resolve();
         }
 
         private static void SaveRefactorings(string[] args)
