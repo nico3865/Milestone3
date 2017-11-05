@@ -27,6 +27,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
         HashSet<string> sourceAndTargetMethodsNotFound = new HashSet<string>();
 
 
+
         public void Resolve()
         {
             long myProjectId = 3; // 3 is gson // 4 is the longest, with 2229 refactorings. // 2 has zero refactorings!!! // 1 is similar to 3, about 549 refactorings, or 506.
