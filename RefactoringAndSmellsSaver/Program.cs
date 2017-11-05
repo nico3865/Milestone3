@@ -25,6 +25,8 @@ namespace RefactoringAndSmellsSaver
                 new ResearchQuestions.RQ7.AnswerResolver().Resolve();
             else if(args[0]=="rq3")
                 new ResearchQuestions.RQ3.AnswerResolver().Resolve();
+            else if(args[0]=="rq2")
+                new ResearchQuestions.RQ2.AnswerResolver().Resolve();
         }
 
         private static void SaveRefactorings(string[] args)
