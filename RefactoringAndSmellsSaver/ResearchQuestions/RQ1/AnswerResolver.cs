@@ -28,7 +28,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
 
         public void Resolve()
         {
-            long myProjectId = 3; // 3 is gson
+            long myProjectId = 3; // 3 is gson // 4 is the longest, with 2229 refactorings. // 2 has zero refactorings!!! // 1 is similar to 3, about 549 refactorings, or 506.
 
             using (var context = new BadSmellMinerDbContext())
             {
@@ -47,9 +47,9 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
             //      2.1- get all smells for each version-of-class-at-commit
             // 3- get all versionsOfMethods for each version-of-a-class-at-commit
             //      3.1- get all smells for each version-of-method-at-commit
-            foreach (var refactoring in allRefactorings)
+            foreach (Refactoring refactoring in allRefactorings)
             {
-                var refactoringCommitId = refactoring.CommitId; // sha hash from git, different from the 1,2,3,4... incremented DB Id (foreign key)
+                string refactoringCommitId = refactoring.CommitId; // sha hash from git, different from the 1,2,3,4... incremented DB Id (foreign key)
                 Commit commit = null;
                 try
                 {
@@ -83,79 +83,16 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                 //refactoring.TargetClassName
                 //refactoring.SourceOperatationName
                 //refactoring.TargetOperatationName
-                HashSet<string> setOfClassSmellsForClassVersionAtCommitBEFORE = new HashSet<string>();
                 List<OrganicClass> classesForCommitBefore = classDictioanryByCommitId[commit.Id - 1];
-                var sourceClassOfRefactoringCOLLECTION = classesForCommitBefore.Where(c => c.FullyQualifiedName == refactoring.SourceClassName);
-                try
-                {
-                    var sourceClassOfRefactoringTEST = sourceClassOfRefactoringCOLLECTION.ToList()[0];
-                }
-                catch
-                {
-                    Console.WriteLine("REALLY BAD, we did not find the refactoring's sourceClass in the commit classes");
-                }
-                if (sourceClassOfRefactoringCOLLECTION.Count() == 1)
-                {
-                    var sourceClassOfRefactoring = sourceClassOfRefactoringCOLLECTION.ToList()[0];
-                    setOfClassSmellsForClassVersionAtCommitBEFORE = findClassSmellsForClassVersionAtCommit(sourceClassOfRefactoring);
-                    // if there are no smells detected for the source class, then that's weird, eventually continue to the next refactoring:
-                    if (setOfClassSmellsForClassVersionAtCommitBEFORE.Count() == 0)
-                    {
-                        Console.WriteLine("A BIT STRANGE BUT NOT UNCOMMON: there are no smells detected before the refactoring was made.");
-                        Console.WriteLine("...... eventually in the future, just collect those cases and continue to the next refactoring");
-                    }
-                    else
-                    {
-                        Console.WriteLine(String.Join(",", setOfClassSmellsForClassVersionAtCommitBEFORE));
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("FILENAME MATCH PROBLEM: not exactly one class was detected in this commit with the refactoring's source class name.");
-                    Console.WriteLine("refactoring.SourceClassName ==> " + refactoring.SourceClassName);
-                    Console.WriteLine("list of filenames ==> " + String.Join(",", sourceClassOfRefactoringCOLLECTION));
-                    sourceAndTargetClassesNotFound.Add(refactoring.SourceClassName);
-                    Console.WriteLine("sourceAndTargetClassesNotFound.Count() ==> " + sourceAndTargetClassesNotFound.Count());
-                    Console.WriteLine("sourceAndTargetClassesNotFound ==> " + String.Join(",", sourceAndTargetClassesNotFound));
-                }
-                //Dictionary<string, HashSet<string>> smellsForEachClassAtCommitBEFORE = getSmellsForEachClassAtCommit(classesForCommitBefore);
+                IEnumerable<OrganicClass> collectionOfSourceClassOfRefactoringMatchedInCommit = classesForCommitBefore.Where(c => c.FullyQualifiedName == refactoring.SourceClassName);
+                HashSet<string> setOfClassSmellsForClassVersionAtCommitBEFORE = getTheSetOfClassSmellsForClassVersionAtCommit_SAFE_HandleUnmatchedSourceAndTargetClassFiles(collectionOfSourceClassOfRefactoringMatchedInCommit, refactoring);
+
 
                 Console.WriteLine("!!!!!!!!!!!!!!!!! CLASS SMELLS AFTER: !!!!!!!!!!!!!!!!!!!!!!");
-                HashSet<string> setOfClassSmellsForClassVersionAtCommitAFTER = new HashSet<string>();
                 List<OrganicClass> classesForCommitAfter = classDictioanryByCommitId[commit.Id];
-                var targetClassOfRefactoringCOLLECTION = classesForCommitAfter.Where(c => c.FullyQualifiedName == (string.IsNullOrEmpty(refactoring.TargetClassName) ? refactoring.SourceClassName : refactoring.TargetClassName));
-                try
-                {
-                    var targetClassOfRefactoringTEST = targetClassOfRefactoringCOLLECTION.ToList()[0];
-                }
-                catch
-                {
-                    Console.WriteLine("REALLY BAD, we did not find the refactoring's targetClass in the commit classes");
-                }
-                if (targetClassOfRefactoringCOLLECTION.Count() == 1)
-                {
-                    var targetClassOfRefactoring = targetClassOfRefactoringCOLLECTION.ToList()[0];
-                    setOfClassSmellsForClassVersionAtCommitAFTER = findClassSmellsForClassVersionAtCommit(targetClassOfRefactoring);
-                    // if there are no smells detected for the target class, then that's weird, eventually continue to the next refactoring:
-                    if (setOfClassSmellsForClassVersionAtCommitAFTER.Count() == 0)
-                    {
-                        Console.WriteLine("GREAT, REFACTORING LEFT NO SMELLS: there are no smells detected after the refactoring was made.");
-                    }
-                    else
-                    {
-                        Console.WriteLine(String.Join(",", setOfClassSmellsForClassVersionAtCommitAFTER));
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("FILENAME MATCH PROBLEM: not exactly one class was detected in this commit with the refactoring's target class name.");
-                    Console.WriteLine("refactoring.TargetClassName ==> "+refactoring.TargetClassName);
-                    Console.WriteLine("list of filenames found ==> " + String.Join(",", targetClassOfRefactoringCOLLECTION));
-                    sourceAndTargetClassesNotFound.Add(refactoring.TargetClassName);
-                    Console.WriteLine("sourceAndTargetClassesNotFound.Count() ==> "+sourceAndTargetClassesNotFound.Count());
-                    Console.WriteLine("sourceAndTargetClassesNotFound ==> " + String.Join(",", sourceAndTargetClassesNotFound));
-                }
-                //Dictionary<string, HashSet<string>> smellsForEachClassAtCommitAFTER = getSmellsForEachClassAtCommit(classesForCommitAfter);
+                IEnumerable<OrganicClass> collectionOfTargetClassOfRefactoringMatchedInCommit = classesForCommitAfter.Where(c => c.FullyQualifiedName == (string.IsNullOrEmpty(refactoring.TargetClassName) ? refactoring.SourceClassName : refactoring.TargetClassName));
+                HashSet<string> setOfClassSmellsForClassVersionAtCommitAFTER = getTheSetOfClassSmellsForClassVersionAtCommit_SAFE_HandleUnmatchedSourceAndTargetClassFiles(collectionOfTargetClassOfRefactoringMatchedInCommit, refactoring);
+
 
                 // THEN, COMPARE CLASS SMELLS BEFORE & AFTER:
                 HashSet<string> smellsThatWentAway = setOfClassSmellsForClassVersionAtCommitBEFORE.Except(setOfClassSmellsForClassVersionAtCommitAFTER).ToHashSet();
@@ -164,11 +101,13 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                 {
                     Console.WriteLine("A REFACTORING REMOVED SOME CODE SMELLS");
                     Console.WriteLine(String.Join(",", smellsThatWentAway));
+                    //TODO: write them to csv
                 }
                 if (smellsThatAppeared.Count() < 0)
                 {
                     Console.WriteLine("A REFACTORING ADDED SOME CODE SMELLS");
                     Console.WriteLine(String.Join(",", smellsThatAppeared));
+                    //TODO: write them to csv
                 }
                 if (setOfClassSmellsForClassVersionAtCommitBEFORE.SetEquals(setOfClassSmellsForClassVersionAtCommitAFTER))
                 {
@@ -215,6 +154,54 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                     Console.WriteLine(x);  // prints "1"
                 }
             }
+        }
+
+
+
+
+        private HashSet<string> getTheSetOfClassSmellsForClassVersionAtCommit_SAFE_HandleUnmatchedSourceAndTargetClassFiles(IEnumerable<OrganicClass> collectionOfSourceOrTargetClassOfRefactoring, Refactoring refactoring)
+        {
+            HashSet<string> setOfClassSmellsForClassVersionAtCommitBEFORE = new HashSet<string>();
+
+            if (collectionOfSourceOrTargetClassOfRefactoring.Count() == 1)
+            {
+                OrganicClass sourceOrTargetClassOfRefactoring = collectionOfSourceOrTargetClassOfRefactoring.ToList()[0];
+                setOfClassSmellsForClassVersionAtCommitBEFORE = getTheSetOfClassSmellsForClassVersionAtCommit(sourceOrTargetClassOfRefactoring);
+            }
+            else
+            {
+                Console.WriteLine("FILENAME MATCH PROBLEM: not exactly one class was detected in this commit with the refactoring's <source/target> class name.");
+                Console.WriteLine("refactoring.SourceClassName ==> " + refactoring.SourceClassName);
+                Console.WriteLine("refactoring.TargetClassName ==> " + refactoring.TargetClassName);
+                Console.WriteLine("list of filenames matching source filename ==> " + String.Join(",", collectionOfSourceOrTargetClassOfRefactoring));
+                sourceAndTargetClassesNotFound.Add(refactoring.SourceClassName);
+                sourceAndTargetClassesNotFound.Add(refactoring.TargetClassName);
+                Console.WriteLine("sourceAndTargetClassesNotFound.Count() ==> " + sourceAndTargetClassesNotFound.Count());
+                Console.WriteLine("sourceAndTargetClassesNotFound ==> " + String.Join(",", sourceAndTargetClassesNotFound));
+                
+                setOfClassSmellsForClassVersionAtCommitBEFORE = new HashSet<string>();
+            }
+            return setOfClassSmellsForClassVersionAtCommitBEFORE;
+
+        }
+
+        private HashSet<string> getTheSetOfClassSmellsForClassVersionAtCommit(OrganicClass sourceClassOfRefactoring)
+        {
+            HashSet<string> setOfClassSmellsForClassVersionAtCommitBEFORE = new HashSet<string>();
+            
+            setOfClassSmellsForClassVersionAtCommitBEFORE = findClassSmellsForClassVersionAtCommit(sourceClassOfRefactoring);
+
+            // if there are no smells detected for the source class, then that's weird, eventually continue to the next refactoring:
+            if (setOfClassSmellsForClassVersionAtCommitBEFORE.Count() == 0)
+            {
+                Console.WriteLine("A BIT STRANGE BUT NOT UNCOMMON: there are no smells detected at this commit.");
+            }
+            else
+            {
+                Console.WriteLine(String.Join(",", setOfClassSmellsForClassVersionAtCommitBEFORE));
+            }
+            return setOfClassSmellsForClassVersionAtCommitBEFORE;
+
         }
 
 
