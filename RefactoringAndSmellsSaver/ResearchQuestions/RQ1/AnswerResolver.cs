@@ -24,6 +24,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
         int countOfCommitsThatWerentFoundForAGivenRefactoring = 0;
 
         HashSet<string> sourceAndTargetClassesNotFound = new HashSet<string>();
+        HashSet<string> sourceAndTargetMethodsNotFound = new HashSet<string>();
 
 
         public void Resolve()
@@ -74,15 +75,10 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                 Console.WriteLine("refactoring.SourceOperatationName ==> " + refactoring.SourceOperatationName);
                 Console.WriteLine("refactoring.TargetOperatationName ==> " + refactoring.TargetOperatationName);
 
-                // we need:
-                // 1- for each class, the list of class smells ==> then compare (but only if class present in both commits)
-                // 2- for each methodInClass, the list of method smells ==> then compare (but only if class AND THIS SPECIFIC METHOD are present in both commits)
 
+
+                Console.WriteLine("##################################################################################################################################");                
                 Console.WriteLine("!!!!!!!!!!!!!!!!! CLASS SMELLS BEFORE: !!!!!!!!!!!!!!!!!!!!!!");
-                //refactoring.SourceClassName
-                //refactoring.TargetClassName
-                //refactoring.SourceOperatationName
-                //refactoring.TargetOperatationName
                 List<OrganicClass> classesForCommitBefore = classDictioanryByCommitId[commit.Id - 1];
                 IEnumerable<OrganicClass> collectionOfSourceClassOfRefactoringMatchedInCommit = classesForCommitBefore.Where(c => c.FullyQualifiedName == refactoring.SourceClassName);
                 HashSet<string> setOfClassSmellsForClassVersionAtCommitBEFORE = getTheSetOfClassSmellsForClassVersionAtCommit_SAFE_HandleUnmatchedSourceAndTargetClassFiles(collectionOfSourceClassOfRefactoringMatchedInCommit, refactoring);
@@ -95,69 +91,92 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
 
 
                 // THEN, COMPARE CLASS SMELLS BEFORE & AFTER:
-                HashSet<string> smellsThatWentAway = setOfClassSmellsForClassVersionAtCommitBEFORE.Except(setOfClassSmellsForClassVersionAtCommitAFTER).ToHashSet();
-                HashSet<string> smellsThatAppeared = setOfClassSmellsForClassVersionAtCommitAFTER.Except(setOfClassSmellsForClassVersionAtCommitBEFORE).ToHashSet();
-                if (smellsThatWentAway.Count() < 0)
+                HashSet<string> classSmellsThatWentAway = setOfClassSmellsForClassVersionAtCommitBEFORE.Except(setOfClassSmellsForClassVersionAtCommitAFTER).ToHashSet();
+                HashSet<string> classSmellsThatAppeared = setOfClassSmellsForClassVersionAtCommitAFTER.Except(setOfClassSmellsForClassVersionAtCommitBEFORE).ToHashSet();
+                if (classSmellsThatWentAway.Count() < 0)
                 {
-                    Console.WriteLine("A REFACTORING REMOVED SOME CODE SMELLS");
-                    Console.WriteLine(String.Join(",", smellsThatWentAway));
+                    Console.WriteLine("A CLASS REFACTORING REMOVED SOME CODE SMELLS");
+                    Console.WriteLine(String.Join(",", classSmellsThatWentAway));
                     //TODO: write them to csv
                 }
-                if (smellsThatAppeared.Count() < 0)
+                if (classSmellsThatAppeared.Count() < 0)
                 {
-                    Console.WriteLine("A REFACTORING ADDED SOME CODE SMELLS");
-                    Console.WriteLine(String.Join(",", smellsThatAppeared));
+                    Console.WriteLine("A CLASS REFACTORING ADDED SOME CODE SMELLS");
+                    Console.WriteLine(String.Join(",", classSmellsThatAppeared));
                     //TODO: write them to csv
                 }
                 if (setOfClassSmellsForClassVersionAtCommitBEFORE.SetEquals(setOfClassSmellsForClassVersionAtCommitAFTER))
                 {
-                    Console.WriteLine("A REFACTORING LEFT DETECTED CODE SMELLS UNCHANGED !!!!!! ");
+                    Console.WriteLine("A CLASS REFACTORING LEFT DETECTED CLASS SMELLS UNCHANGED !!!!!! ");
                 }
 
 
-                // Console.WriteLine("!!!!!!!!!!!!!!!!! METHOD SMELLS BEFORE: !!!!!!!!!!!!!!!!!!!!!!");
-                //refactoring.SourceOperatationName
-                //refactoring.TargetOperatationName
-                // //List<OrganicClass> classesForCommitBefore = classDictioanryByCommitId[commit.Id - 1];
-                // foreach (OrganicClass classVersionAtCommit in classesForCommitBefore)
-                // {
-                //     var methodsForVersionOfClassAtCommit = methodDictioanryByOrganicClassIdWhichAreDistinctVersionsOfAClasseAtEachDifferentCommit[classVersionAtCommit.Id];
-                //     foreach (var methodVersionAtCommit in methodsForVersionOfClassAtCommit)
-                //     {
-                //         HashSet<string> setOfMethodsSmellsForClassVersionAtCommit = findMethodSmellsForMethodForClassVersionAtCommit(classVersionAtCommit);
-                //     }
-                // }
-                // Console.WriteLine("!!!!!!!!!!!!!!!!! METHOD SMELLS AFTER: !!!!!!!!!!!!!!!!!!!!!!");
-                // //HashSet<string> setOfClassSmellsForCommit = findClassSmellsForCommit(commit.Id);
-                // //List<OrganicClass> classesForCommitAfter = classDictioanryByCommitId[commit.Id];
-                // foreach (OrganicClass classVersionAtCommit in classesForCommitAfter)
-                // {
 
-                //     var methodsForVersionOfClassAtCommit = methodDictioanryByOrganicClassIdWhichAreDistinctVersionsOfAClasseAtEachDifferentCommit[classVersionAtCommit.Id];
-                //     foreach (var methodVersionAtCommit in methodsForVersionOfClassAtCommit)
-                //     {
-                //         HashSet<string> setOfMethodsSmellsForClassVersionAtCommit = findMethodSmellsForMethodForClassVersionAtCommit(methodVersionAtCommit);
-                //     }
-                // }
+                Console.WriteLine("##################################################################################################################################");
+                Console.WriteLine("!!!!!!!!!!!!!!!!! METHOD SMELLS BEFORE: !!!!!!!!!!!!!!!!!!!!!!");
+                HashSet<string> setOfMethodsSmellsForMethodForClassVersionAtCommitBEFORE = getMethodSmellsForMethodForClassVersionAtCommit_SAFE(collectionOfSourceClassOfRefactoringMatchedInCommit, refactoring);
 
+                Console.WriteLine("!!!!!!!!!!!!!!!!! METHOD SMELLS AFTER: !!!!!!!!!!!!!!!!!!!!!!");
+                HashSet<string> setOfMethodsSmellsForMethodForClassVersionAtCommitAFTER = getMethodSmellsForMethodForClassVersionAtCommit_SAFE(collectionOfTargetClassOfRefactoringMatchedInCommit, refactoring);
 
                 // // FINALLY: COMPARE METHOD SMELLS BEFORE & AFTER:
-
-
-                // obtain the difference of sets for methods:
-                // IEnumerable<int> a = new int[] { 1, 2, 5 };
-                // IEnumerable<int> b = new int[] { 2, 3, 5 };
-                HashSet<int> a = new HashSet<int> { 1, 2, 5 };
-                HashSet<int> b = new HashSet<int> { 2, 3, 5 };
-                foreach (int x in a.Except(b))
+                HashSet<string> methodSmellsThatWentAway = setOfMethodsSmellsForMethodForClassVersionAtCommitBEFORE.Except(setOfMethodsSmellsForMethodForClassVersionAtCommitAFTER).ToHashSet();
+                HashSet<string> methodSmellsThatAppeared = setOfMethodsSmellsForMethodForClassVersionAtCommitAFTER.Except(setOfMethodsSmellsForMethodForClassVersionAtCommitBEFORE).ToHashSet();
+                if (classSmellsThatWentAway.Count() < 0)
                 {
-                    Console.WriteLine(x);  // prints "1"
+                    Console.WriteLine("A METHOD REFACTORING REMOVED SOME CODE SMELLS");
+                    Console.WriteLine(String.Join(",", methodSmellsThatWentAway));
+                    //TODO: write them to csv
                 }
+                if (classSmellsThatAppeared.Count() < 0)
+                {
+                    Console.WriteLine("A METHOD REFACTORING ADDED SOME CODE SMELLS");
+                    Console.WriteLine(String.Join(",", methodSmellsThatAppeared));
+                    //TODO: write them to csv
+                }
+                if (setOfClassSmellsForClassVersionAtCommitBEFORE.SetEquals(setOfClassSmellsForClassVersionAtCommitAFTER))
+                {
+                    Console.WriteLine("A METHOD REFACTORING LEFT DETECTED METHOD SMELLS UNCHANGED !!!!!! ");
+                }
+
+
+
             }
         }
 
 
 
+        private HashSet<string> getMethodSmellsForMethodForClassVersionAtCommit_SAFE(IEnumerable<OrganicClass> collectionOfSourceClassOfRefactoringMatchedInCommit, Refactoring refactoring)
+        {
+            HashSet<string> setOfMethodsSmellsForMethodForClassVersionAtCommitBEFORE = new HashSet<string>();
+            if (collectionOfSourceClassOfRefactoringMatchedInCommit.Count() == 1)
+            {
+                var x = refactoring.SourceOperatationName;
+                var y = refactoring.TargetOperatationName;
+
+                OrganicClass classVersionAtCommit = collectionOfSourceClassOfRefactoringMatchedInCommit.ToList()[0];
+                var methodsForVersionOfClassAtCommit = methodDictioanryByOrganicClassIdWhichAreDistinctVersionsOfAClasseAtEachDifferentCommit[classVersionAtCommit.Id];
+                IEnumerable<OrganicMethod> collectionOfMatchedSourceMethodsAtCommit = methodsForVersionOfClassAtCommit.Where(c => c.FullyQualifiedName == refactoring.SourceOperatationName);
+                if (collectionOfMatchedSourceMethodsAtCommit.Count() == 1)
+                {
+                    OrganicMethod matchedSourceMethodsAtCommit = collectionOfMatchedSourceMethodsAtCommit.ToList()[0];
+                    setOfMethodsSmellsForMethodForClassVersionAtCommitBEFORE = getMethodSmellsForMethodForClassVersionAtCommit(matchedSourceMethodsAtCommit);
+                }
+            }
+            else
+            {
+                Console.WriteLine("FILENAME MATCH PROBLEM: not exactly one method was detected in this commit with the refactoring's <source/target> method name.");
+                Console.WriteLine("refactoring.SourceOperatationName ==> " + refactoring.SourceOperatationName);
+                Console.WriteLine("refactoring.TargetOperatationName ==> " + refactoring.TargetOperatationName);
+                Console.WriteLine("list of filenames matching source filename ==> " + String.Join(",", collectionOfSourceClassOfRefactoringMatchedInCommit));
+                sourceAndTargetMethodsNotFound.Add(refactoring.SourceOperatationName);
+                sourceAndTargetMethodsNotFound.Add(refactoring.TargetClassName);
+                Console.WriteLine("sourceAndTargetMethodsNotFound.Count() ==> " + sourceAndTargetMethodsNotFound.Count());
+                Console.WriteLine("sourceAndTargetMethodsNotFound.Count ==> " + String.Join(",", sourceAndTargetMethodsNotFound));
+
+            }
+            return setOfMethodsSmellsForMethodForClassVersionAtCommitBEFORE;
+        }
 
         private HashSet<string> getTheSetOfClassSmellsForClassVersionAtCommit_SAFE_HandleUnmatchedSourceAndTargetClassFiles(IEnumerable<OrganicClass> collectionOfSourceOrTargetClassOfRefactoring, Refactoring refactoring)
         {
@@ -178,8 +197,6 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                 sourceAndTargetClassesNotFound.Add(refactoring.TargetClassName);
                 Console.WriteLine("sourceAndTargetClassesNotFound.Count() ==> " + sourceAndTargetClassesNotFound.Count());
                 Console.WriteLine("sourceAndTargetClassesNotFound ==> " + String.Join(",", sourceAndTargetClassesNotFound));
-                
-                setOfClassSmellsForClassVersionAtCommitBEFORE = new HashSet<string>();
             }
             return setOfClassSmellsForClassVersionAtCommitBEFORE;
 
@@ -188,7 +205,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
         private HashSet<string> getTheSetOfClassSmellsForClassVersionAtCommit(OrganicClass sourceClassOfRefactoring)
         {
             HashSet<string> setOfClassSmellsForClassVersionAtCommitBEFORE = new HashSet<string>();
-            
+
             setOfClassSmellsForClassVersionAtCommitBEFORE = findClassSmellsForClassVersionAtCommit(sourceClassOfRefactoring);
 
             // if there are no smells detected for the source class, then that's weird, eventually continue to the next refactoring:
@@ -229,34 +246,34 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
 
         }
 
-        // private HashSet<string> findMethodSmellsForMethodForClassVersionAtCommit(OrganicMethod methodVersionAtCommit)
-        // {
-        //     HashSet<string> setOfMethodsSmellsForMethodForClassVersionAtCommit = new HashSet<string>();
-        //     try
-        //     {
-        //         //get the smells for method:
-        //         // var methodsForVersionOfClassAtCommit = methodDictioanryByOrganicClassIdWhichAreDistinctVersionsOfAClasseAtEachDifferentCommit[classVersionAtCommit.Id];
-        //         // foreach (var methodVersionAtCommit in methodsForVersionOfClassAtCommit)
-        //         // {
-        //         var smellsForVersionOfMethodAtCommit = smellDictioanryByOrganicMethodID[methodVersionAtCommit.Id];
-        //         //print them:
-        //         foreach (var smellForMethod in smellsForVersionOfMethodAtCommit)
-        //         {
-        //             Console.WriteLine("************************** findMethodSmellsForMethodForClassVersionAtCommit: *************************** ");
-        //             //Console.WriteLine("classVersionAtCommit.FullyQualifiedName ==> " + classVersionAtCommit.FullyQualifiedName);
-        //             Console.WriteLine("methodVersionAtCommit.FullyQualifiedName ==> " + methodVersionAtCommit.FullyQualifiedName);
-        //             Console.WriteLine("smellForMethod.Name ==> " + smellForMethod.Name);
-        //         }
-        //         // }
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         //Console.WriteLine("{0} Exception caught.", e);
-        //     }
+        private HashSet<string> getMethodSmellsForMethodForClassVersionAtCommit(OrganicMethod methodVersionAtCommit)
+        {
+            HashSet<string> setOfMethodsSmellsForMethodForClassVersionAtCommit = new HashSet<string>();
+            try
+            {
+                //get the smells for method:
+                // var methodsForVersionOfClassAtCommit = methodDictioanryByOrganicClassIdWhichAreDistinctVersionsOfAClasseAtEachDifferentCommit[classVersionAtCommit.Id];
+                // foreach (var methodVersionAtCommit in methodsForVersionOfClassAtCommit)
+                // {
+                var smellsForVersionOfMethodAtCommit = smellDictioanryByOrganicMethodID[methodVersionAtCommit.Id];
+                //print them:
+                foreach (var smellForMethod in smellsForVersionOfMethodAtCommit)
+                {
+                    Console.WriteLine("************************** findMethodSmellsForMethodForClassVersionAtCommit: *************************** ");
+                    //Console.WriteLine("classVersionAtCommit.FullyQualifiedName ==> " + classVersionAtCommit.FullyQualifiedName);
+                    Console.WriteLine("methodVersionAtCommit.FullyQualifiedName ==> " + methodVersionAtCommit.FullyQualifiedName);
+                    Console.WriteLine("smellForMethod.Name ==> " + smellForMethod.Name);
+                }
+                // }
+            }
+            catch (Exception e)
+            {
+                //Console.WriteLine("{0} Exception caught.", e);
+            }
 
-        //     return setOfMethodsSmellsForMethodForClassVersionAtCommit;
+            return setOfMethodsSmellsForMethodForClassVersionAtCommit;
 
-        // }
+        }
 
         private HashSet<string> findClassSmellsForClassVersionAtCommit(OrganicClass classVersionAtCommit)
         {
