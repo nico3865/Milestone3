@@ -5,13 +5,14 @@ using RefactoringAndSmellsSaver.DomainModels;
 
 using DataRepository;
 using Microsoft.EntityFrameworkCore;
-
+using System.IO;
 
 
 namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
 {
     public class SmellHistoryHolder
     {
+        private static int disappearedSmellId = 0;
         private Dictionary<string, List<SmellLifetime>> _smellHolder = new Dictionary<string, List<SmellLifetime>>();
 
 
@@ -32,6 +33,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
 
                     foreach(var unseenSmell in unseenSmells)
                     {
+                        disappearedSmellId++;
                         unseenSmell.Resolved=true;
                         unseenSmell.DemiseDate=commit.DateTime;
 
@@ -47,11 +49,11 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
                         {
                             refactoringsForSmell = dbContext.Refactorings.Where(
                                     q => q.CommitId == commit.CommitId
-                                            && (
-                                                string.IsNullOrEmpty(q.SourceClassName) ? false : q.SourceClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
-                                                || string.IsNullOrEmpty(q.TargetClassName) ? false : q.TargetClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
-                                                || string.IsNullOrEmpty(q.SourceOperatationName) ? false : q.SourceOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
-                                                || string.IsNullOrEmpty(q.TargetOperatationName) ? false : q.TargetOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                            && ( true // just get whatever refactoring was done at that commit for now. Forget about matching the exact file, it doesn't work I don't know why.
+                                                // string.IsNullOrEmpty(q.SourceClassName) ? false : q.SourceClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                                // || string.IsNullOrEmpty(q.TargetClassName) ? false : q.TargetClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                                // || string.IsNullOrEmpty(q.SourceOperatationName) ? false : q.SourceOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                                // || string.IsNullOrEmpty(q.TargetOperatationName) ? false : q.TargetOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
                                                 )
                                         )
                                 .AsNoTracking()
@@ -60,31 +62,45 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("commit.Id ==> "+commit.Id);
+                            //Console.WriteLine("commit.Id ==> "+commit.Id);
                         }
                         // output each of them for retrofit so I can verify against my own. (!!!!)
                         if(refactoringsForSmell != null && refactoringsForSmell.Count() > 0) 
                         {
                             foreach(Refactoring refactoring in refactoringsForSmell)
                             {
-                                Console.WriteLine("*************************************************************************************");
-                                Console.WriteLine("refactoring.ProjectId ==> "+refactoring.ProjectId);
-                                Console.WriteLine("refactoring.CommitId ==> "+refactoring.CommitId);
-                                Console.WriteLine("refactoring.Id) ==> "+refactoring.Id);
-                                Console.WriteLine("refactoring.SourceClassName ==> "+refactoring.SourceClassName);
-                                Console.WriteLine("refactoring.SourceOperatationName ==> "+refactoring.SourceOperatationName);
-                                Console.WriteLine("refactoring.TargetClassName ==> "+refactoring.TargetClassName);
-                                Console.WriteLine("refactoring.TargetOperatationName ==> "+refactoring.TargetOperatationName);
-                                Console.WriteLine("refactoring.Type ==> "+refactoring.Type);
-                                Console.WriteLine("--------------------------------------------------------------------------------------");
-                                Console.WriteLine("unseenSmell.SmellName ==> "+unseenSmell.SmellName);
-                                Console.WriteLine("smell key (which is the method or class) ==> "+key);
-                                Console.WriteLine("unseenSmell.Resolved ==> "+unseenSmell.Resolved);
-                                Console.WriteLine("unseenSmell.BirthDate ==> "+unseenSmell.BirthDate);
-                                Console.WriteLine("unseenSmell.DemiseDate ==> "+unseenSmell.DemiseDate);
+                                // Console.WriteLine("*************************************************************************************");
+                                // Console.WriteLine("refactoring.ProjectId ==> "+refactoring.ProjectId);
+                                // Console.WriteLine("refactoring.CommitId ==> "+refactoring.CommitId);
+                                // Console.WriteLine("refactoring.Id) ==> "+refactoring.Id);
+                                // Console.WriteLine("refactoring.SourceClassName ==> "+refactoring.SourceClassName);
+                                // Console.WriteLine("refactoring.SourceOperatationName ==> "+refactoring.SourceOperatationName);
+                                // Console.WriteLine("refactoring.TargetClassName ==> "+refactoring.TargetClassName);
+                                // Console.WriteLine("refactoring.TargetOperatationName ==> "+refactoring.TargetOperatationName);
+                                // Console.WriteLine("refactoring.Type ==> "+refactoring.Type);
+                                // Console.WriteLine("--------------------------------------------------------------------------------------");
+                                // Console.WriteLine("unseenSmell.SmellName ==> "+unseenSmell.SmellName);
+                                // Console.WriteLine("smell key (which is the method or class) ==> "+key);
+                                // Console.WriteLine("unseenSmell.Resolved ==> "+unseenSmell.Resolved);
+                                // Console.WriteLine("unseenSmell.BirthDate ==> "+unseenSmell.BirthDate);
+                                // Console.WriteLine("unseenSmell.DemiseDate ==> "+unseenSmell.DemiseDate);
+                                // write csv:
+                                using (StreamWriter sw = File.AppendText("smellsThatDisappearedWithCounterAndLocationAndDateOfBirthAndDemiseAndCorrespondingRefactoringTypeAndIdAndCommitIdIfAvailable.csv"))
+                                {
+                                    sw.WriteLine(disappearedSmellId + ", " + unseenSmell.SmellName + " , " + key + ", " + unseenSmell.BirthDate + ", " + unseenSmell.DemiseDate + ", " + refactoring.Type + ", " + refactoring.Id + ", " + refactoring.CommitId);
+                                }
+
                             }
                         }
-                        Console.WriteLine();
+                        else 
+                        {
+                            // write csv:
+                            using (StreamWriter sw = File.AppendText("smellsThatDisappearedWithCounterAndLocationAndDateOfBirthAndDemiseAndCorrespondingRefactoringTypeAndIdAndCommitIdIfAvailable.csv"))
+                            {
+                                sw.WriteLine(disappearedSmellId + ", " + unseenSmell.SmellName + " , " + key + ", " + unseenSmell.BirthDate + ", " + unseenSmell.DemiseDate);
+                            }
+                        }
+                        //Console.WriteLine();
                         //
                     }
                 }
