@@ -40,7 +40,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                 currentProjectId = projectIdLoop;
                 using (var context = new BadSmellMinerDbContext())
                 {
-                    performAllQueriesForProjectAndStoreThem(myProjectId);
+                    performAllQueriesForProjectAndStoreThem(projectIdLoop);
                     hashAllNecessaryTables();
                     findSmellsBeforeAndAfter();
                 }
@@ -67,26 +67,26 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e); // it's probably because Organic writes the Commit table .... I imagine.
-                    Console.WriteLine("countOfCommitsThatWerentFoundForAGivenRefactoring ==> " + ++countOfCommitsThatWerentFoundForAGivenRefactoring);
+                    //Console.WriteLine(e); // it's probably because Organic writes the Commit table .... I imagine.
+                    //Console.WriteLine("countOfCommitsThatWerentFoundForAGivenRefactoring ==> " + ++countOfCommitsThatWerentFoundForAGivenRefactoring);
                     continue;
                 }
 
-                Console.WriteLine("#################################################################");
-                Console.WriteLine("########################## REFACTORING #########################");
-                Console.WriteLine("#################################################################");
-                Console.WriteLine("refactoring.Type ==> " + refactoring.Type);
-                Console.WriteLine("refactoring.Id ==> " + refactoring.Id);
-                Console.WriteLine("commit.CommitId ==> " + commit.CommitId);
-                Console.WriteLine("refactoring.SourceClassName ==> " + refactoring.SourceClassName);
-                Console.WriteLine("refactoring.TargetClassName ==> " + refactoring.TargetClassName);
-                Console.WriteLine("refactoring.SourceOperatationName ==> " + refactoring.SourceOperatationName);
-                Console.WriteLine("refactoring.TargetOperatationName ==> " + refactoring.TargetOperatationName);
+                //Console.WriteLine("#################################################################");
+                //Console.WriteLine("########################## REFACTORING #########################");
+                //Console.WriteLine("#################################################################");
+                //Console.WriteLine("refactoring.Type ==> " + refactoring.Type);
+                //Console.WriteLine("refactoring.Id ==> " + refactoring.Id);
+                //Console.WriteLine("commit.CommitId ==> " + commit.CommitId);
+                //Console.WriteLine("refactoring.SourceClassName ==> " + refactoring.SourceClassName);
+                //Console.WriteLine("refactoring.TargetClassName ==> " + refactoring.TargetClassName);
+                //Console.WriteLine("refactoring.SourceOperatationName ==> " + refactoring.SourceOperatationName);
+                //Console.WriteLine("refactoring.TargetOperatationName ==> " + refactoring.TargetOperatationName);
 
-                Console.WriteLine("##################################################################################################################################");
+                //Console.WriteLine("##################################################################################################################################");
                 printClassSmellsBeforeAndAfter(commit, refactoring); // now does both methods and classes at the same time.
 
-                Console.WriteLine("##################################################################################################################################");
+                //Console.WriteLine("##################################################################################################################################");
                 //printMethodSmellsBeforeAndAfter(commit, refactoring);
             }
         }
@@ -98,8 +98,8 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
             HashSet<string> methodSmellsThatAppeared = setOfMethodsSmellsForMethodForClassVersionAtCommitAFTER.Except(setOfMethodsSmellsForMethodForClassVersionAtCommitBEFORE).ToHashSet();
             if (methodSmellsThatWentAway.Count() > 0)
             {
-                Console.WriteLine("A REFACTORING REMOVED SOME CODE SMELLS");
-                Console.WriteLine(String.Join(",", methodSmellsThatWentAway));
+                //Console.WriteLine("A REFACTORING REMOVED SOME CODE SMELLS");
+                //Console.WriteLine(String.Join(",", methodSmellsThatWentAway));
                 if (isMethodNotClassRefactoring)
                 {
                     //TODO: EASY --> write them to methodSmellsThatWentAway.csv (only two fields per line: refactoringId, string-method-smell-that-went-away)
@@ -142,8 +142,8 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
             }
             else if (methodSmellsThatAppeared.Count() > 0)
             {
-                Console.WriteLine("A REFACTORING ADDED SOME CODE SMELLS");
-                Console.WriteLine(String.Join(",", methodSmellsThatAppeared));
+                //Console.WriteLine("A REFACTORING ADDED SOME CODE SMELLS");
+                //Console.WriteLine(String.Join(",", methodSmellsThatAppeared));
                 if (isMethodNotClassRefactoring)
                 {
                     //TODO: EASY --> write them to methodSmellsThatAppeared.csv 
@@ -185,7 +185,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
             }
             else if (setOfMethodsSmellsForMethodForClassVersionAtCommitBEFORE.SetEquals(setOfMethodsSmellsForMethodForClassVersionAtCommitAFTER))
             {
-                Console.WriteLine("A REFACTORING LEFT DETECTED METHOD SMELLS UNCHANGED !!!!!! ");
+                //Console.WriteLine("A REFACTORING LEFT DETECTED METHOD SMELLS UNCHANGED !!!!!! ");
             }
             else 
             {
@@ -236,7 +236,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
             // collect the set of smells for each class in commits before and after so we can later compare them.
             foreach(var classBefore in classesForCommitBefore_DICT)
             {
-                Console.WriteLine("!!!!!!!!!!!!!!!!! CLASS SMELLS BEFORE: !!!!!!!!!!!!!!!!!!!!!!");
+                //Console.WriteLine("!!!!!!!!!!!!!!!!! CLASS SMELLS BEFORE: !!!!!!!!!!!!!!!!!!!!!!");
                 //List<OrganicClass> classesForCommitBefore = classDictioanryByCommitId[commit.Id - 1];
                 //IEnumerable<OrganicClass> collectionOfSourceClassOfRefactoringMatchedInCommit = ;//classesForCommitBefore;//.Where(c => string.IsNullOrEmpty(c.FullyQualifiedName)? false : c.FullyQualifiedName.Contains(refactoring.SourceClassName));
                 HashSet<string> setOfClassSmellsForClassVersionAtCommitBEFORE = getTheSetOfClassSmellsForClassVersionAtCommit_SAFE_HandleUnmatchedSourceAndTargetClassFiles(classBefore.Value, refactoring);
@@ -244,7 +244,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
             }
             foreach(var classAfter in classesForCommitAfter_DICT)
             {
-                Console.WriteLine("!!!!!!!!!!!!!!!!! CLASS SMELLS AFTER: !!!!!!!!!!!!!!!!!!!!!!");
+                //Console.WriteLine("!!!!!!!!!!!!!!!!! CLASS SMELLS AFTER: !!!!!!!!!!!!!!!!!!!!!!");
                 //List<OrganicClass> classesForCommitAfter = classDictioanryByCommitId[commit.Id];
                 //IEnumerable<OrganicClass> collectionOfTargetClassOfRefactoringMatchedInCommit = classesForCommitAfter;//.Where(c => string.IsNullOrEmpty(c.FullyQualifiedName)? false : c.FullyQualifiedName.Contains((string.IsNullOrEmpty(refactoring.TargetClassName) ? refactoring.SourceClassName : refactoring.TargetClassName)));
                 HashSet<string> setOfClassSmellsForClassVersionAtCommitAFTER = getTheSetOfClassSmellsForClassVersionAtCommit_SAFE_HandleUnmatchedSourceAndTargetClassFiles(classAfter.Value, refactoring);
@@ -292,7 +292,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                 //THEN also for methods:
                 printMethodSmellsForMethodForClassVersionAtCommit_SAFE(null, classesForCommitAfter_DICT[keyToUseToSearch], refactoring);
             }
-            Console.WriteLine();
+            //Console.WriteLine();
 
         }
 
@@ -391,11 +391,11 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
             // if there are no smells detected for the source class, then that's weird, eventually continue to the next refactoring:
             if (setOfClassSmellsForClassVersionAtCommitBEFORE.Count() == 0)
             {
-                Console.WriteLine("A BIT STRANGE BUT NOT UNCOMMON: there are no smells detected at this commit.");
+                //Console.WriteLine("A BIT STRANGE BUT NOT UNCOMMON: there are no smells detected at this commit.");
             }
             else
             {
-                Console.WriteLine(String.Join(",", setOfClassSmellsForClassVersionAtCommitBEFORE));
+                //Console.WriteLine(String.Join(",", setOfClassSmellsForClassVersionAtCommitBEFORE));
             }
             return setOfClassSmellsForClassVersionAtCommitBEFORE;
 
@@ -415,16 +415,16 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                 //print them:
                 foreach (var smellForMethod in smellsForVersionOfMethodAtCommit)
                 {
-                    Console.WriteLine("************************** findMethodSmellsForMethodForClassVersionAtCommit: *************************** ");
-                    //Console.WriteLine("classVersionAtCommit.FullyQualifiedName ==> " + classVersionAtCommit.FullyQualifiedName);
-                    Console.WriteLine("methodVersionAtCommit.FullyQualifiedName ==> " + methodVersionAtCommit.FullyQualifiedName);
-                    Console.WriteLine("smellForMethod.Name ==> " + smellForMethod.Name);
+                    //Console.WriteLine("************************** findMethodSmellsForMethodForClassVersionAtCommit: *************************** ");
+                    ////Console.WriteLine("classVersionAtCommit.FullyQualifiedName ==> " + classVersionAtCommit.FullyQualifiedName);
+                    //Console.WriteLine("methodVersionAtCommit.FullyQualifiedName ==> " + methodVersionAtCommit.FullyQualifiedName);
+                    //Console.WriteLine("smellForMethod.Name ==> " + smellForMethod.Name);
                 }
                 // }
             }
             catch (Exception e)
             {
-                //Console.WriteLine("{0} Exception caught.", e);
+                ////Console.WriteLine("{0} Exception caught.", e);
             }
 
             return setOfMethodsSmellsForMethodForClassVersionAtCommit;
@@ -440,9 +440,9 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
                 // print them:
                 foreach (var smellForClass in smellsForVersionOfClassAtCommit)
                 {
-                    Console.WriteLine("************************** findClassSmellsForClassVersionAtCommit: *************************** ");
-                    Console.WriteLine("classInstanceAtCommit.FullyQualifiedName ==> " + classVersionAtCommit.FullyQualifiedName);
-                    Console.WriteLine("smellForClass.Name ==> " + smellForClass.Name);
+                    //Console.WriteLine("************************** findClassSmellsForClassVersionAtCommit: *************************** ");
+                    //Console.WriteLine("classInstanceAtCommit.FullyQualifiedName ==> " + classVersionAtCommit.FullyQualifiedName);
+                    //Console.WriteLine("smellForClass.Name ==> " + smellForClass.Name);
 
                     // populate the set:
                     setOfClassSmellsForCommit.Add(smellForClass.Name);
@@ -450,7 +450,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
             }
             catch (Exception e)
             {
-                //Console.WriteLine("{0} Exception caught.", e);
+                ////Console.WriteLine("{0} Exception caught.", e);
             }
 
 
@@ -465,7 +465,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ1
             {
                 // get all the refactorings:
                 allRefactorings = context.Refactorings.Where(q => q.ProjectId == myProjectId).ToArray(); // this calls the query.
-                Console.WriteLine(allRefactorings.Length);
+                //Console.WriteLine(allRefactorings.Length);
                 //var classInstances = context.OrganicClasses.AsNoTracking().ToArray(); // this calls the query.
                 allVersionsOfClassesAtCommit = context.OrganicClasses.Where(q => q.Commit.ProjectId == myProjectId).AsNoTracking().ToArray(); // this calls the query.
                 allVersionOfMethodAtCommit = context.OrganicMethods.Where(q => q.OrganicClass.Commit.ProjectId == myProjectId).AsNoTracking().ToArray();
