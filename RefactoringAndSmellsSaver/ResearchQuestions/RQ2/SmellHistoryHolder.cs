@@ -44,11 +44,11 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
                         {
                             refactoringsForSmell = dbContext.Refactorings.Where(
                                     q => q.CommitId == commit.CommitId
-                                            && ( true // just get whatever refactoring was done at that commit for now. Forget about matching the exact file, it doesn't work I don't know why.
-                                                // string.IsNullOrEmpty(q.SourceClassName) ? false : q.SourceClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
-                                                // || string.IsNullOrEmpty(q.TargetClassName) ? false : q.TargetClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
-                                                // || string.IsNullOrEmpty(q.SourceOperatationName) ? false : q.SourceOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
-                                                // || string.IsNullOrEmpty(q.TargetOperatationName) ? false : q.TargetOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                            && ( // true // true would be to just get whatever refactoring was done at that commit for now. Forget about matching the exact file, it doesn't work I don't know why.
+                                                string.IsNullOrEmpty(q.SourceClassName) ? false : q.SourceClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                                || string.IsNullOrEmpty(q.TargetClassName) ? false : q.TargetClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                                || string.IsNullOrEmpty(q.SourceOperatationName) ? false : q.SourceOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                                || string.IsNullOrEmpty(q.TargetOperatationName) ? false : q.TargetOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
                                                 )
                                         )
                                 .AsNoTracking()
@@ -93,7 +93,8 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
                                         unseenSmell.BirthDate + ", " + 
                                         unseenSmell.DemiseDate + ", " + 
                                         refactoring.Type + ", " + 
-                                        refactoring.Id + ", "
+                                        refactoring.Id + ", " +
+                                        refactoring.SourceClassName +"----"+ refactoring.TargetClassName+"----"+refactoring.SourceOperatationName+"----"+refactoring.TargetOperatationName
                                         );
                                 }
 
@@ -136,11 +137,22 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
                 return "";
             if(keyDoesStartWithMethodMarker(key))
             {
-                return key.Substring(7,key.Length-8);
+                string keyCleaned = key.Substring(7,key.Length-7);
+                if(keyCleaned.Contains("-"))
+                {
+                    Console.WriteLine("NOOOOOO WHAT IS GOING ON there's a dash in the keyCleaned.");
+                }
+
+                return keyCleaned;
             } 
             else if(keyDoesStartWithClassMarker(key))
             {
-                return key.Substring(5,key.Length-6);
+                string keyCleaned = key.Substring(6,key.Length-6);
+                if(keyCleaned.Contains("-"))
+                {
+                    Console.WriteLine("NOOOOOO WHAT IS GOING ON there's a dash in the keyCleaned.");
+                }
+                return keyCleaned;
             }
             else 
             {
