@@ -5,13 +5,14 @@ using RefactoringAndSmellsSaver.DomainModels;
 
 using DataRepository;
 using Microsoft.EntityFrameworkCore;
-
+using System.IO;
 
 
 namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
 {
     public class SmellHistoryHolder
     {
+        private static int counterOfSmellsThatDisappeared = 0;
         private Dictionary<string, List<SmellLifetime>> _smellHolder = new Dictionary<string, List<SmellLifetime>>();
 
 
@@ -32,26 +33,22 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
 
                     foreach(var unseenSmell in unseenSmells)
                     {
+                        counterOfSmellsThatDisappeared++;
                         unseenSmell.Resolved=true;
                         unseenSmell.DemiseDate=commit.DateTime;
 
                         //ADD NIC: I could get the refactorings for each smell, in here:
-                        // dbContext.Refactorings.Where(q => Convert.ToInt64(q.CommitId) == commit.Id)
-                        //     .AsNoTracking()
-                        //     .ToArray();
-                        //var commitIdOfSmell
-                        //var d = unseenSmell.key;
                         var keyCleaned = cleanKey(key);
                         Refactoring[] refactoringsForSmell = null;
                         try
                         {
                             refactoringsForSmell = dbContext.Refactorings.Where(
                                     q => q.CommitId == commit.CommitId
-                                            && (
-                                                string.IsNullOrEmpty(q.SourceClassName) ? false : q.SourceClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
-                                                || string.IsNullOrEmpty(q.TargetClassName) ? false : q.TargetClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
-                                                || string.IsNullOrEmpty(q.SourceOperatationName) ? false : q.SourceOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
-                                                || string.IsNullOrEmpty(q.TargetOperatationName) ? false : q.TargetOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                            && ( true // just get whatever refactoring was done at that commit for now. Forget about matching the exact file, it doesn't work I don't know why.
+                                                // string.IsNullOrEmpty(q.SourceClassName) ? false : q.SourceClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                                // || string.IsNullOrEmpty(q.TargetClassName) ? false : q.TargetClassName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                                // || string.IsNullOrEmpty(q.SourceOperatationName) ? false : q.SourceOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
+                                                // || string.IsNullOrEmpty(q.TargetOperatationName) ? false : q.TargetOperatationName.Split(".", StringSplitOptions.None).Last() == keyCleaned
                                                 )
                                         )
                                 .AsNoTracking()
@@ -60,31 +57,67 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine("commit.Id ==> "+commit.Id);
+                            //Console.WriteLine("commit.Id ==> "+commit.Id);
                         }
                         // output each of them for retrofit so I can verify against my own. (!!!!)
                         if(refactoringsForSmell != null && refactoringsForSmell.Count() > 0) 
                         {
                             foreach(Refactoring refactoring in refactoringsForSmell)
                             {
-                                Console.WriteLine("*************************************************************************************");
-                                Console.WriteLine("refactoring.ProjectId ==> "+refactoring.ProjectId);
-                                Console.WriteLine("refactoring.CommitId ==> "+refactoring.CommitId);
-                                Console.WriteLine("refactoring.Id) ==> "+refactoring.Id);
-                                Console.WriteLine("refactoring.SourceClassName ==> "+refactoring.SourceClassName);
-                                Console.WriteLine("refactoring.SourceOperatationName ==> "+refactoring.SourceOperatationName);
-                                Console.WriteLine("refactoring.TargetClassName ==> "+refactoring.TargetClassName);
-                                Console.WriteLine("refactoring.TargetOperatationName ==> "+refactoring.TargetOperatationName);
-                                Console.WriteLine("refactoring.Type ==> "+refactoring.Type);
-                                Console.WriteLine("--------------------------------------------------------------------------------------");
-                                Console.WriteLine("unseenSmell.SmellName ==> "+unseenSmell.SmellName);
-                                Console.WriteLine("smell key (which is the method or class) ==> "+key);
-                                Console.WriteLine("unseenSmell.Resolved ==> "+unseenSmell.Resolved);
-                                Console.WriteLine("unseenSmell.BirthDate ==> "+unseenSmell.BirthDate);
-                                Console.WriteLine("unseenSmell.DemiseDate ==> "+unseenSmell.DemiseDate);
+                                // Console.WriteLine("*************************************************************************************");
+                                // Console.WriteLine("refactoring.ProjectId ==> "+refactoring.ProjectId);
+                                // Console.WriteLine("refactoring.CommitId ==> "+refactoring.CommitId);
+                                // Console.WriteLine("refactoring.Id) ==> "+refactoring.Id);
+                                // Console.WriteLine("refactoring.SourceClassName ==> "+refactoring.SourceClassName);
+                                // Console.WriteLine("refactoring.SourceOperatationName ==> "+refactoring.SourceOperatationName);
+                                // Console.WriteLine("refactoring.TargetClassName ==> "+refactoring.TargetClassName);
+                                // Console.WriteLine("refactoring.TargetOperatationName ==> "+refactoring.TargetOperatationName);
+                                // Console.WriteLine("refactoring.Type ==> "+refactoring.Type);
+                                // Console.WriteLine("--------------------------------------------------------------------------------------");
+                                // Console.WriteLine("unseenSmell.SmellName ==> "+unseenSmell.SmellName);
+                                // Console.WriteLine("smell key (which is the method or class) ==> "+key);
+                                // Console.WriteLine("unseenSmell.Resolved ==> "+unseenSmell.Resolved);
+                                // Console.WriteLine("unseenSmell.BirthDate ==> "+unseenSmell.BirthDate);
+                                // Console.WriteLine("unseenSmell.DemiseDate ==> "+unseenSmell.DemiseDate);
+                                // write csv:
+                                using (StreamWriter sw = File.AppendText("smellsThatDisappearedWithCounterAndLocationAndDateOfBirthAndDemiseAndCorrespondingRefactoringTypeAndIdAndCommitIdIfAvailable.csv"))
+                                {
+                                    sw.WriteLine(
+                                        refactoring.ProjectId + ", " +
+                                        unseenSmell.CommitId + ", " +
+                                        counterOfSmellsThatDisappeared + ", " + 
+                                        unseenSmell.SmellName + " , " + 
+                                        keyDoesStartWithMethodMarker(key) + " , " + 
+                                        keyDoesStartWithClassMarker(key) + " , " + 
+                                        cleanKeyToRemoveIsMethodOrIsClassAtStart(key) + ", " + 
+                                        unseenSmell.BirthDate + ", " + 
+                                        unseenSmell.DemiseDate + ", " + 
+                                        refactoring.Type + ", " + 
+                                        refactoring.Id + ", "
+                                        );
+                                }
+
                             }
                         }
-                        Console.WriteLine();
+                        else 
+                        {
+                            // write csv:
+                            using (StreamWriter sw = File.AppendText("smellsThatDisappearedWithCounterAndLocationAndDateOfBirthAndDemiseAndCorrespondingRefactoringTypeAndIdAndCommitIdIfAvailable.csv"))
+                            {
+                                sw.WriteLine(
+                                    unseenSmell.ProjectId + ", " +
+                                    unseenSmell.CommitId + ", " +
+                                    counterOfSmellsThatDisappeared + ", " + 
+                                    unseenSmell.SmellName + " , " + 
+                                    keyDoesStartWithMethodMarker(key) + " , " + 
+                                    keyDoesStartWithClassMarker(key) + " , " + 
+                                    cleanKeyToRemoveIsMethodOrIsClassAtStart(key) + ", " + 
+                                    unseenSmell.BirthDate + ", " + 
+                                    unseenSmell.DemiseDate
+                                    );
+                            }
+                        }
+                        //Console.WriteLine();
                         //
                     }
                 }
@@ -96,29 +129,36 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
         {
             var splitByDot = key.Split(".");
             return splitByDot[splitByDot.Length-1];
-            // if(string.IsNullOrEmpty(key))
-            //     return "";
-            // if(key.Contains("method-"))
-            // {
-            //     return key.Substring(7,key.Length-8);
-            // } 
-            // else if(key.Contains("class-"))
-            // {
-            //     return key.Substring(5,key.Length-6);
-            // }
-            // else 
-            // {
-            //     Console.WriteLine("a key didn't contain method- or class- as prefix");
-            //     return "";
-            // }
-            
+        }
+        private string cleanKeyToRemoveIsMethodOrIsClassAtStart(string key)
+        {
+            if(string.IsNullOrEmpty(key))
+                return "";
+            if(keyDoesStartWithMethodMarker(key))
+            {
+                return key.Substring(7,key.Length-8);
+            } 
+            else if(keyDoesStartWithClassMarker(key))
+            {
+                return key.Substring(5,key.Length-6);
+            }
+            else 
+            {
+                Console.WriteLine("a key didn't contain method- or class- as prefix");
+                return "";
+            }
+        }
+        private Boolean keyDoesStartWithMethodMarker(string keyBeforeCleaned)
+        {
+            return keyBeforeCleaned.StartsWith("method-");
+        }
+        private Boolean keyDoesStartWithClassMarker(string keyBeforeCleaned)
+        {
+            return keyBeforeCleaned.StartsWith("class-");
         }
 
         private void AddMethodRelatedSmells(OrganicClass organicClass,Commit commit)
         {
-
-            // I could get the refactorings for each smell, in here:
-
             foreach (var organicMethod in organicClass.Methods)
             {
                 var key = $"method-{organicMethod.FullyQualifiedName}";
@@ -132,7 +172,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
 
                 foreach (var smell in smells)
                 {
-                    AddSmellToHistory(commit.DateTime.Value, key, smell);
+                    AddSmellToHistory(commit.DateTime.Value, key, smell, commit);
                 }
             }
 
@@ -151,11 +191,11 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
 
             foreach (var smell in smells)
             {
-                AddSmellToHistory(commit.DateTime.Value, key, smell);
+                AddSmellToHistory(commit.DateTime.Value, key, smell, commit);
             }
         }
 
-        private void AddSmellToHistory(DateTime smellBirthDate, string key, OrganicSmell smell)
+        private void AddSmellToHistory(DateTime smellBirthDate, string key, OrganicSmell smell, Commit commit)
         {
             var smellLifetimes = _smellHolder[key];
             var existingSmell = smellLifetimes
@@ -169,7 +209,9 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
                     BirthDate = smellBirthDate,
                     Resolved = false,
                     DemiseDate = null,
-                    HaveBeenSeenInTheLastCommit = false
+                    HaveBeenSeenInTheLastCommit = false,
+                    ProjectId = commit.ProjectId,
+                    CommitId = commit.Id
                 });
             }
             else
@@ -187,5 +229,8 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
         public bool HaveBeenSeenInTheLastCommit { get; set; }
         public DateTime BirthDate { get; set; }
         public DateTime? DemiseDate { get; set; }
+        public long ProjectId {get; set;}
+
+        public long CommitId {get; set;}
     }
 }

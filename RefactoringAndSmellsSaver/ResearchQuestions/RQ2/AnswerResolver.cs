@@ -56,6 +56,7 @@ namespace RefactoringAndSmellsSaver.ResearchQuestions.RQ2
         private OrganicClass[] GetClassesOfCommit(Commit commit, BadSmellMinerDbContext dbContext)
         {
             return dbContext.OrganicClasses.Where(q => q.CommitId == commit.Id)
+            .Include(m => m.Commit)
             .Include(m => m.Smells)
             .Include(m => m.Methods).ThenInclude(m=>m.Smells)
             .AsNoTracking()
